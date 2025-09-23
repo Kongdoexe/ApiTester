@@ -78,6 +78,13 @@ app.post("/register", async (req, res) => {
             return res.status(400).json({ message: "gmail must be a valid Gmail address" });
         }
 
+        const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passRegex.test(password)) {
+            return res.status(400).json({ 
+                message: "Password ต้องมีอย่างน้อย 8 ตัวอักษร และมีทั้ง A-Z, a-z, ตัวเลข, และอักขระพิเศษ" 
+            });
+        }
+
         const [dupgmail] = await conn.query(
             "SELECT 1 FROM users WHERE gmail = ? LIMIT 1",
             [gmail]

@@ -16,10 +16,14 @@
    จะได้ข้อมูล User ทั้งหมด
 2. **localhost:3000/register**
    ```json
-   "gmail" : "",
-   "password" : "",
-   "username" : ""
+   {
+      "gmail" : "",
+      "password" : "",
+      "username" : ""
+   }
 3. **localhost:3000/login**
    ```json
-   "gmail": "",
-   "password: ""
+   {
+      "gmail": "",
+      "password": ""
+   }

@@ -22,47 +22,6 @@ app.get("/", async (_req, res) => {
     }
 });
 
-app.post("/login", async (req, res) => {
-    let conn;
-    try {
-        conn = await connectdb();
-        const { gmail, password } = req.body ?? {};
-
-        if (!gmail || !password) {
-            return res.status(400).json({ message: "gmail, password จำเป็นต้องมี" });
-        }
-
-        const [rows] = await conn.query(
-            "SELECT * FROM users WHERE gmail = ? LIMIT 1",
-            [gmail]
-        );
-
-        if (rows.length === 0) {
-            return res.status(401).json({ message: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
-        }
-
-        const user = rows[0];
-
-        const ok = await bcrypt.compare(password, user.password);
-        if (!ok) {
-            return res.status(401).json({ message: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
-        }
-
-        return res.status(200).json({
-            message: "เข้าสู่ระบบสำเร็จ",
-            data: {
-                email: user.gmail,
-                username: user.username,
-            },
-        });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: "DB error" });
-    } finally {
-        if (conn) conn.release();
-    }
-});
-
 app.post("/register", async (req, res) => {
     let conn;
     try {
@@ -108,5 +67,45 @@ app.post("/register", async (req, res) => {
     }
 });
 
+app.post("/login", async (req, res) => {
+    let conn;
+    try {
+        conn = await connectdb();
+        const { gmail, password } = req.body ?? {};
+
+        if (!gmail || !password) {
+            return res.status(400).json({ message: "gmail, password จำเป็นต้องมี" });
+        }
+
+        const [rows] = await conn.query(
+            "SELECT * FROM users WHERE gmail = ? LIMIT 1",
+            [gmail]
+        );
+
+        if (rows.length === 0) {
+            return res.status(401).json({ message: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
+        }
+
+        const user = rows[0];
+
+        const ok = await bcrypt.compare(password, user.password);
+        if (!ok) {
+            return res.status(401).json({ message: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
+        }
+
+        return res.status(200).json({
+            message: "เข้าสู่ระบบสำเร็จ",
+            data: {
+                email: user.gmail,
+                username: user.username,
+            },
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "DB error" });
+    } finally {
+        if (conn) conn.release();
+    }
+});
 
 module.exports = app;

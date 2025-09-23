@@ -32,6 +32,10 @@ app.post("/register", async (req, res) => {
             return res.status(400).json({ message: "gmail, username, password จำเป็นต้องมี" });
         }
 
+        if (gmail.length > 50) {
+            return res.status(400).json({ message: "gmail ต้องไม่เกิน 50 ตัวอักษร" });
+        }
+
         const gmailRegex = /^(?!.*\.\.)[a-z0-9](?:[a-z0-9.]{0,62}[a-z0-9])?@gmail\.com$/i;
         if (!gmailRegex.test(gmail)) {
             return res.status(400).json({ message: "gmail must be a valid Gmail address" });

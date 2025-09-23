@@ -92,7 +92,7 @@ app.post("/register", async (req, res) => {
             [gmail, username, passwordHash]
         );
 
-        return res.status(201).json({ message: "Register success" });
+        return res.status(201).json({ message: "สมัครสมาชิกสำเร็จ" });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: "DB error" });

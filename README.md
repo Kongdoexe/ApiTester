@@ -10,3 +10,16 @@
 4. **รันเซิร์ฟเวอร์**
    ```bash
    node server.js
+
+## ขั้นตอนการใช้งาน API
+1. **localhost:3000/**
+   จะได้ข้อมูล User ทั้งหมด
+2. **localhost:3000/register**
+   ```json
+   "gmail" : "",
+   "password" : "",
+   "username" : ""
+3. **localhost:3000/login**
+   ```json
+   "gmail": "",
+   "password: ""

@@ -60,6 +60,20 @@ app.get("/", async (_req, res) => {
   }
 });
 
+app.get("/clearDatabase", async (req, res) => {
+  let conn;
+  try {
+    conn = await connectdb();
+    const [response] = await conn.query("DELETE FROM `users`")
+    return res.json({ message: "เคลียร์เสร็จสิ้น", response: response.affectedRows });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "DB error" });
+  } finally {
+    if (conn) conn.release();
+  }
+});
+
 app.post("/register", async (req, res) => {
   let conn;
   try {

@@ -4,7 +4,10 @@
    ```bash
    git clone <repository-url>
    cd <project-folder>
-2. **ติดตั้ง dependencies**
+2. **ติดตั้ง jest+supertest**
+   ```bash
+   npm install --save-dev jest supertest
+3. **ติดตั้ง dependencies**
    ```bash
    npm install
 4. **รันเซิร์ฟเวอร์**

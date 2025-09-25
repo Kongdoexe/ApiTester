@@ -13,7 +13,13 @@
 4. **รันเซิร์ฟเวอร์**
    ```bash
    node server.js
-
+5. **test mock**
+   ```bash
+   npm test tests/app.test.js
+7. **test realDB**
+   ```bash
+   npm test tests/app.real.test.js
+   
 ## ขั้นตอนการใช้งาน API
 1. **localhost:3000/**
    จะได้ข้อมูล User ทั้งหมด

@@ -4,8 +4,11 @@
   "description": "",
   "main": "index.js",
 "scripts": {
-  "test": "jest"
-},
+  "test": "jest",
+  "test:mock": "jest tests/app.mock.test.js",             
+  "test:real": "jest tests/app.real.test.js"
+}
+  ,
   "keywords": [],
   "author": "",
   "license": "ISC",

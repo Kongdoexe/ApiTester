@@ -1,68 +1,78 @@
 const request = require("supertest");
 const app = require("../app");
 
-// mock database connection (ป้องกัน query ของจริงเวลาทดสอบ)
-// Persist users array across all mock connections
-const mockUsers = [
-  { uid: 99, gmail: "mock@gmail.com", username: "mockuser", password: "hashed" }
-];
+const initialMockUser = {
+  uid: 99,
+  gmail: "pingpong@gmail.com",
+  username: "pingpong",
+  password: "PasW0rd@55"
+};
 
-jest.mock("../database/database", () => {
-  return {
-    connectdb: jest.fn().mockResolvedValue({
-      query: jest.fn(function (sql, params) {
-        if (sql.startsWith("SELECT * FROM users")) {
-          // Return all users, including those registered during tests
-          return Promise.resolve([mockUsers.length ? mockUsers : [
-            { uid: 99, gmail: "mock@gmail.com", username: "mockuser", password: "hashed" }
-          ], []]);
-        }
-        if (sql.startsWith("SELECT 1 FROM users")) {
-          // Check for duplicate gmail
-          const exists = mockUsers.some(u => u.gmail === params[0]);
-          return Promise.resolve([exists ? [{ '1': 1 }] : []]);
-        }
-        if (sql.startsWith("INSERT INTO users")) {
-          // Simulate user registration
-          const newUser = {
-            uid: mockUsers.length + 1,
-            gmail: params[0],
-            username: params[1],
-            password: params[2]
-          };
-          mockUsers.push(newUser);
-          return Promise.resolve([{ insertId: newUser.uid }]);
-        }
-        return Promise.resolve([[]]);
-      }),
-      release: jest.fn(),
+const mockUsers = [{ ...initialMockUser }];
+
+jest.mock("../database/database", () => ({
+  connectdb: jest.fn().mockResolvedValue({
+    query: jest.fn((sql, params) => {
+      if (sql.startsWith("SELECT * FROM users")) {
+        return Promise.resolve([[...mockUsers], []]);
+      }
+      if (sql.startsWith("SELECT 1 FROM users")) {
+        const exists = mockUsers.some(u => u.gmail === params[0]);
+        return Promise.resolve([exists ? [{ '1': 1 }] : []]);
+      }
+      if (sql.startsWith("INSERT INTO users")) {
+        const newUser = {
+          uid: mockUsers.length + 1,
+          gmail: params[0],
+          username: params[1],
+          password: params[2]
+        };
+        mockUsers.push(newUser);
+        return Promise.resolve([{ insertId: newUser.uid }]);
+      }
+      return Promise.resolve([[]]);
     }),
-  };
-});
+    release: jest.fn(),
+  }),
+}));
 
 describe("API Tests", () => {
-  // it("GET / ควรได้ users กลับมา", async () => {
-  //   // สร้าง user ใหม่
-  //   await request(app).post("/register").send({
-  //     gmail: "jest_test@gmail.com",
-  //     username: "jestuser",
-  //     password: "Password@123"
-  //   });
+  beforeEach(() => {
+    mockUsers.length = 0;
+    mockUsers.push({ ...initialMockUser });
+  });
 
-  //   // ดึง user list
-  //   const res = await request(app).get("/");
-  //   expect(res.status).toBe(200);
-  //   expect(Array.isArray(res.body)).toBe(true);
-  //   expect(res.body.length).toBeGreaterThan(0);
+  it("should get list of users", async () => {
+    const registerData = {
+      gmail: "winnie@gmail.com", 
+      username: "winnie",
+      password: "Password@123"
+    };
+    
+    const registerRes = await request(app)
+      .post("/register")
+      .send(registerData);
+      
+    expect(registerRes.status).toBe(201);
+    console.log('Mock users after registration:', JSON.stringify(mockUsers, null, 2));
 
-  //   // ตรวจว่ามี user ที่เพิ่งสมัคร
-  //   const user = res.body.find(u => u.gmail === "jest_test@gmail.com");
-  //   expect(user).toBeDefined();
-  //   expect(user).toHaveProperty("username", "jestuser");
-  // });
+    const res = await request(app).get("/");
+    console.log('Raw SQL Query Result:', JSON.stringify([[...mockUsers], []], null, 2));
+    console.log('API Response:', JSON.stringify(res.body, null, 2));
+    
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBeGreaterThan(0);
+    
+    expect(res.body).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        gmail: registerData.gmail,
+        username: registerData.username
+      })
+    ]));
+});
 
-
-  it("POST /register ควรสมัครสำเร็จ", async () => {
+  it("should register a new user successfully", async () => {
     const res = await request(app).post("/register").send({
       gmail: "newuser@gmail.com",
       username: "newbie",
@@ -72,7 +82,7 @@ describe("API Tests", () => {
     expect(res.body).toHaveProperty("message", "สมัครสมาชิกสำเร็จ");
   });
 
-  it("POST /register ถ้า password อ่อนเกินไปควร error", async () => {
+  it("should reject registration with weak password", async () => {
     const res = await request(app).post("/register").send({
       gmail: "weakpass@gmail.com",
       username: "weak",
@@ -82,7 +92,7 @@ describe("API Tests", () => {
     expect(res.body.message).toMatch(/Password/);
   });
 
-  it("POST /login ถ้าข้อมูลผิดควร 401", async () => {
+  it("should reject login with invalid credentials", async () => {
     const res = await request(app).post("/login").send({
       gmail: "notfound@gmail.com",
       password: "wrong",

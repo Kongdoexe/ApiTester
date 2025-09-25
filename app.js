@@ -46,34 +46,6 @@ function validateGmail(gmailInput) {
   return { valid: true, reason: "" };
 }
 
-function validatePassword(password) {
-  if (password.length < 8) {
-    return { valid: false, reason: "Password ต้องมีอย่างน้อย 8 ตัวอักษร" };
-  }
-
-  if (!/[a-z]/.test(password)) {
-    return { valid: false, reason: "ต้องมีตัวอักษรเล็ก (a-z) อย่างน้อย 1 ตัว" };
-  }
-
-  if (!/[A-Z]/.test(password)) {
-    return { valid: false, reason: "ต้องมีตัวอักษรใหญ่ (A-Z) อย่างน้อย 1 ตัว" };
-  }
-
-  if (!/[0-9]/.test(password)) {
-    return { valid: false, reason: "ต้องมีตัวเลข (0-9) อย่างน้อย 1 ตัว" };
-  }
-
-  if (!/[@$!%*?&]/.test(password)) {
-    return { valid: false, reason: "ต้องมีอักขระพิเศษอย่างน้อย 1 ตัว (@$!%*?&)" };
-  }
-
-  if (!/^[A-Za-z\d@$!%*?&]+$/.test(password)) {
-    return { valid: false, reason: "ใช้ได้เฉพาะ A-Z, a-z, 0-9 และ @$!%*?& เท่านั้น" };
-  }
-
-  return { valid: true, reason: "" };
-}
-
 app.get("/", async (_req, res) => {
   let conn;
   try {
@@ -109,9 +81,11 @@ app.post("/register", async (req, res) => {
       return res.status(400).json({ message: reason });
     }
 
-    const { validPassword, reasonPassword } = validatePassword(password);
-    if (!validPassword) {
-      return res.status(400).json({ message: reasonPassword });
+    const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passRegex.test(password)) {
+      return res.status(400).json({
+        message: "Password ต้องมีอย่างน้อย 8 ตัวอักษร และมีทั้ง A-Z, a-z, ตัวเลข, และอักขระพิเศษ (@$!%*?&)",
+      });
     }
 
     const [dupgmail] = await conn.query(

@@ -27,3 +27,8 @@
       "gmail": "",
       "password": ""
    }
+
+## ขั้นตอนการใช้ Test ( Jest + SuperTest )
+1. **รันคำสั่ง**
+   ```bash
+   npm test tests/app.test.js

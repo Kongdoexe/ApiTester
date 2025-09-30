@@ -27,8 +27,12 @@
       "gmail": "",
       "password": ""
    }
-
+4. **localhost:3000/clearDatabase**
+   
 ## ขั้นตอนการใช้ Test ( Jest + SuperTest )
-1. **รันคำสั่ง**
+1. **รัน API เพื่อเคลียร์ database**
+   ```bash
+   localhost:3000/clearDatabase
+2. **รันคำสั่งเพื่อลองทดสอบข้อมูลเทส**
    ```bash
    npm test tests/app.test.js
